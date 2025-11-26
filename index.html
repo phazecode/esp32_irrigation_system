@@ -4,66 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monitoring roślin</title>
-  <script type="module">
-    // Import funkcji z SDK Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-database.js";
-
-    // Konfiguracja Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCdqdU5LsZXXpWQXj6loefmZ9eG8jvYxT0",
-      authDomain: "esp32-irrigation-system-fcdac.firebaseapp.com",
-      databaseURL: "https://esp32-irrigation-system-fcdac-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "esp32-irrigation-system-fcdac",
-      storageBucket: "esp32-irrigation-system-fcdac.appspot.com",
-      messagingSenderId: "1083461623532",
-      appId: "1:1083461623532:web:f19c857f445125f4b14fc9"
-    };
-
-    // Inicjalizacja Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // Referencje do danych
-    const soilRef = ref(db, 'plant/soil_moisture');
-    const waterRef = ref(db, 'plant/water_level');
-    const alertRef = ref(db, 'plant/alerts');
-
-    // Funkcja wyświetlania danych
-    function updateDisplay(soil, water, alert) {
-      document.getElementById('soil').textContent = `Wilgotność gleby: ${soil ?? 'ładowanie...'} %`;
-      document.getElementById('water').textContent = `Poziom wody: ${water ?? 'ładowanie...'} %`;
-      document.getElementById('alert').textContent = alert ? `Alert: ${alert}` : '';
-    }
-
-    // Odczyt danych w czasie rzeczywistym
-    onValue(soilRef, (snapshot) => {
-      const soil = snapshot.val();
-      const water = document.getElementById('water').dataset.value ?? null;
-      const alert = document.getElementById('alert').dataset.value ?? null;
-      updateDisplay(soil, water, alert);
-    });
-
-    onValue(waterRef, (snapshot) => {
-      const water = snapshot.val();
-      const soil = document.getElementById('soil').dataset.value ?? null;
-      const alert = document.getElementById('alert').dataset.value ?? null;
-      updateDisplay(soil, water, alert);
-    });
-
-    onValue(alertRef, (snapshot) => {
-      const alert = snapshot.val();
-      const soil = document.getElementById('soil').dataset.value ?? null;
-      const water = document.getElementById('water').dataset.value ?? null;
-      updateDisplay(soil, water, alert);
-    });
-
-  </script>
 </head>
 <body>
   <h1>Monitoring roślin</h1>
-  <p id="soil">Wilgotność gleby: ładowanie...</p>
-  <p id="water">Poziom wody: ładowanie...</p>
-  <p id="alert"></p>
+  <h2> Witaj! </h2>
 </body>
 </html>
+
