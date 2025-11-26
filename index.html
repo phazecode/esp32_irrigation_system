@@ -1,13 +1,98 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monitoring roślin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINIMALNY ODCZYT DANYCH Z FIREBASE</title>
 </head>
 <body>
-  <h1>Monitoring roślin</h1>
-  <h2> Witaj! </h2>
+    <header>
+        <h1>Status Wilgotności Gleby (Minimalny)</h1>
+    </header>
+
+    <!-- Kontenery na dane i status -->
+    <div id="data-container" style="margin-top: 20px;">
+        <p><strong>Status Logowania:</strong> <span id="auth-status" style="color: red;">Oczekiwanie na autoryzację...</span></p>
+        <p><strong>Wilgotność (%):</strong> <span id="moisture-value" style="font-size: 24px;">Ładowanie...</span></p>
+        <p><strong>Ostatnia Aktualizacja:</strong> <span id="update-time">--</span></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import wymaganych modułów Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+        // Twoja konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdqdU5LsZXXpWQXj6loefmZ9eG8jvYxT0",
+            authDomain: "esp32-irrigation-system-fcdac.firebaseapp.com",
+            databaseURL: "https://esp32-irrigation-system-fcdac-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "esp32-irrigation-system-fcdac",
+            storageBucket: "esp32-irrigation-system-fcdac.firebasestorage.app",
+            messagingSenderId: "1083461623532",
+            appId: "1:1083461623532:web:f19c857f445125f4b14fc9"
+        };
+
+        // Dane do logowania
+        const USER_EMAIL = "patryk.kedzia001@gmail.com";
+        const USER_PASSWORD = "123456"; 
+
+        // Inicjalizacja Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        // Referencje do elementów DOM
+        const moistureValueEl = document.getElementById('moisture-value');
+        const authStatusEl = document.getElementById('auth-status');
+        const updateTimeEl = document.getElementById('update-time');
+
+        // --- 2. Rozpoczęcie nasłuchiwania danych po zalogowaniu ---
+        function startDataListener() {
+            authStatusEl.textContent = 'Zalogowano. Odczytuję dane...';
+            authStatusEl.style.color = 'green';
+            
+            // Referencja do ścieżki /plant/soil_moisture
+            const moistureRef = ref(database, 'plant/soil_moisture');
+
+            // Nasłuchiwanie zmian w czasie rzeczywistym
+            onValue(moistureRef, (snapshot) => {
+                if (snapshot.exists() && typeof snapshot.val() === 'number') {
+                    const moisture = snapshot.val();
+                    moistureValueEl.textContent = `${moisture} %`;
+                    updateTimeEl.textContent = new Date().toLocaleTimeString();
+                } else if (!snapshot.exists()) {
+                    moistureValueEl.textContent = 'Brak Danych';
+                    updateTimeEl.textContent = 'Oczekuję na ESP32';
+                }
+            }, (error) => {
+                console.error("Błąd odczytu z Firebase RTDB:", error);
+                authStatusEl.textContent = 'BŁĄD DANYCH!';
+                authStatusEl.style.color = 'darkred';
+                moistureValueEl.textContent = 'BŁĄD!';
+            });
+        }
+
+
+        // --- 1. Logowanie użytkownika ---
+        signInWithEmailAndPassword(auth, USER_EMAIL, USER_PASSWORD)
+            .then(() => {
+                // Udane logowanie
+                startDataListener();
+
+            })
+            .catch((error) => {
+                // Błąd logowania
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                authStatusEl.textContent = `BŁĄD LOGOWANIA: ${errorCode}`;
+                authStatusEl.style.color = 'darkred';
+                moistureValueEl.textContent = 'Nieudane logowanie!';
+                console.error(`Błąd logowania: ${errorMessage}`);
+            });
+
+    </script>
 </body>
 </html>
-
